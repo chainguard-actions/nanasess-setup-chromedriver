@@ -9,6 +9,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
 | v2.2.2 | [`v2.2.2`](https://github.com/chainguard-actions/nanasess-setup-chromedriver/tree/v2.2.2) | [`42cc299`](https://github.com/nanasess/setup-chromedriver/commit/42cc2998329f041de87dc3cfa33a930eacd57eaa) |
+| v2.4.0 | [`v2.4.0`](https://github.com/chainguard-actions/nanasess-setup-chromedriver/tree/v2.4.0) | [`c75c3d5`](https://github.com/nanasess/setup-chromedriver/commit/c75c3d53d445b96d41dbf2355797b470953c6c30) |
 
 ## Privacy
 
