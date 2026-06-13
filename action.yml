@@ -1,0 +1,11 @@
+name: 'setup-chromedriver'
+description: 'Setup chromedriver'
+author: 'nanasess'
+inputs:
+  chromedriver-version:
+    description: 'The chromedriver version to install'
+    required: false
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+  pre: chainguard-phonehome.js

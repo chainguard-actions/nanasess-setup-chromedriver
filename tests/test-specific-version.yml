@@ -1,0 +1,25 @@
+name: Test setup-chromedriver with specific version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          chromedriver-version: '114.0.5735.90'
+      - name: Assert chromedriver is installed
+        run: |
+          if ! command -v chromedriver &>/dev/null; then
+            echo "FAIL: chromedriver not found in PATH"
+            exit 1
+          fi
+          ACTUAL_VERSION=$(chromedriver --version | awk '{print $2}')
+          echo "actual chromedriver version: $ACTUAL_VERSION"
+          if [ "$ACTUAL_VERSION" != "114.0.5735.90" ]; then
+            echo "FAIL: expected version 114.0.5735.90 but got $ACTUAL_VERSION"
+            exit 1
+          fi
+          echo "PASS"
