@@ -1,15 +1,50 @@
-# nanasess/setup-chromedriver
+# setup-chromedriver
 
-Setup chromedriver
+[![Test chromedriver on *NIX](https://github.com/nanasess/setup-chromedriver/actions/workflows/test.yml/badge.svg)](https://github.com/nanasess/setup-chromedriver/actions/workflows/test.yml)
+[![Test chromedriver on Windows](https://github.com/nanasess/setup-chromedriver/actions/workflows/windows.yml/badge.svg)](https://github.com/nanasess/setup-chromedriver/actions/workflows/windows.yml)
+[![GitHub](https://img.shields.io/github/license/nanasess/setup-chromedriver)](./LICENSE)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/nanasess)](https://github.com/sponsors/nanasess)
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/nanasess/setup-chromedriver](https://github.com/nanasess/setup-chromedriver).
+This action sets up a [ChromeDriver](https://chromedriver.chromium.org/) for use in actions
 
-## Versions
+## OS/Platform support
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v2.2.2 | [`v2.2.2`](https://github.com/chainguard-actions/nanasess-setup-chromedriver/tree/v2.2.2) | [`42cc299`](https://github.com/nanasess/setup-chromedriver/commit/42cc2998329f041de87dc3cfa33a930eacd57eaa) |
-| v2.4.0 | [`v2.4.0`](https://github.com/chainguard-actions/nanasess-setup-chromedriver/tree/v2.4.0) | [`c75c3d5`](https://github.com/nanasess/setup-chromedriver/commit/c75c3d53d445b96d41dbf2355797b470953c6c30) |
+- ubuntu-latest, ubuntu-24.04, ubuntu-22.04 and ubuntu-20.04
+- macos-latest, macos-14, macos-13 and macos-12
+- windows-latest, windows-2022 and windows-2019
+
+# Usage
+
+See [action.yml](action.yml)
+
+## for ubuntu-latest, macos-latest
+
+``` yaml
+steps:
+- uses: actions/checkout@v2
+- uses: nanasess/setup-chromedriver@v2
+  with:
+    # Optional: do not specify to match Chrome's version
+    chromedriver-version: '88.0.4324.96'
+    # Optional: if your chrome binary name is different
+    chromeapp: chrome
+- run: |
+    export DISPLAY=:99
+    chromedriver --url-base=/wd/hub &
+    sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+ ```
+
+## for windows-latest
+
+``` yaml
+steps:
+- uses: actions/checkout@v2
+- uses: nanasess/setup-chromedriver@v2
+  with:
+    # Optional: do not specify to match Chrome's version
+    chromedriver-version: '88.0.4324.96'
+- run: chromedriver --url-base=/wd/hub &
+ ```
 
 ## Privacy
 
