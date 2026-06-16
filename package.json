@@ -1,0 +1,50 @@
+{
+  "name": "setup-chromedriver",
+  "private": true,
+  "description": "setup-chromedriver",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "package": "ncc build lib/setup-chromedriver.js --source-map --license licenses.txt",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nanasess/setup-chromedriver.git"
+  },
+  "keywords": [
+    "actions",
+    "php",
+    "setup"
+  ],
+  "author": "nanasess",
+  "license": "GPL",
+  "dependencies": {
+    "@actions/core": "^3.0.0",
+    "@actions/exec": "^3.0.0",
+    "@actions/io": "^3.0.0",
+    "@actions/tool-cache": "4.0.0",
+    "semver": "^7.7.3",
+    "typed-rest-client": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.2.1",
+    "@types/selenium-webdriver": "^4.35.4",
+    "@types/semver": "^7.7.1",
+    "@types/yauzl": "^2.10.3",
+    "@vercel/ncc": "^0.38.4",
+    "@jest/globals": "^30.3.0",
+    "jest": "^30.3.0",
+    "jest-circus": "^30.3.0",
+    "prettier": "^3.8.1",
+    "selenium-webdriver": "^4.39.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1"
+}

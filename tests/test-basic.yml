@@ -1,0 +1,20 @@
+name: Test basic setup-chromedriver (no version specified)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: setup
+        uses: .
+      - name: Assert chromedriver is installed and on PATH
+        run: |
+          echo "Checking chromedriver is available..."
+          if ! command -v chromedriver &>/dev/null; then
+            echo "FAIL: chromedriver not found on PATH"
+            exit 1
+          fi
+          echo "chromedriver found at: $(command -v chromedriver)"
+          chromedriver --version
+          echo "PASS"

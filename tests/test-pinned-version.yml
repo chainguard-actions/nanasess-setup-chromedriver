@@ -1,0 +1,32 @@
+name: Test setup-chromedriver with pinned version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: setup
+        uses: .
+        with:
+          chromedriver-version: "114.0.5735.90"
+      - name: Assert chromedriver is installed and on PATH
+        run: |
+          echo "Checking chromedriver is available..."
+          if ! command -v chromedriver &>/dev/null; then
+            echo "FAIL: chromedriver not found on PATH"
+            exit 1
+          fi
+          echo "chromedriver found at: $(command -v chromedriver)"
+          chromedriver --version
+          echo "PASS"
+      - name: Assert chromedriver version matches pinned version
+        run: |
+          ACTUAL_VERSION=$(chromedriver --version | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
+          echo "actual version: $ACTUAL_VERSION"
+          EXPECTED="114.0.5735.90"
+          if [ "$ACTUAL_VERSION" != "$EXPECTED" ]; then
+            echo "FAIL: expected chromedriver version '$EXPECTED', got '$ACTUAL_VERSION'"
+            exit 1
+          fi
+          echo "PASS"
