@@ -1,0 +1,38 @@
+name: Test specific chromedriver version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install prerequisites (jq, unzip, curl)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends jq unzip curl
+
+      - id: action
+        uses: .
+        with:
+          # Use a specific known stable version (Chrome for Testing API, >= 115)
+          chromedriver-version: "120.0.6099.109"
+          # Provide a dummy chromeapp since we are specifying the version explicitly
+          # and the script won't need to call chrome --version
+          chromeapp: "google-chrome-stable"
+
+      - name: Assert chromedriver is installed at the expected version
+        run: |
+          if ! command -v chromedriver > /dev/null 2>&1; then
+            echo "FAIL: chromedriver not found in PATH"
+            exit 1
+          fi
+          ACTUAL_VERSION=$(chromedriver --version | awk '{print $2}')
+          echo "actual chromedriver version: $ACTUAL_VERSION"
+          EXPECTED_MAJOR="120"
+          ACTUAL_MAJOR=$(echo "$ACTUAL_VERSION" | cut -d '.' -f 1)
+          if [ "$ACTUAL_MAJOR" != "$EXPECTED_MAJOR" ]; then
+            echo "FAIL: expected major version $EXPECTED_MAJOR but got $ACTUAL_MAJOR"
+            exit 1
+          fi
+          echo "PASS: chromedriver version $ACTUAL_VERSION matches expected major $EXPECTED_MAJOR"

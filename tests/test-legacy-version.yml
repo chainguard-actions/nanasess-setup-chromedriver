@@ -1,0 +1,36 @@
+name: Test legacy chromedriver version (< 115)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install prerequisites (unzip, curl)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends unzip curl
+
+      - id: action
+        uses: .
+        with:
+          # Use a legacy version (< 115) which uses the old chromedriver storage API
+          chromedriver-version: "114.0.5735.90"
+          chromeapp: "google-chrome-stable"
+
+      - name: Assert chromedriver is installed at the expected legacy version
+        run: |
+          if ! command -v chromedriver > /dev/null 2>&1; then
+            echo "FAIL: chromedriver not found in PATH"
+            exit 1
+          fi
+          ACTUAL_VERSION=$(chromedriver --version | awk '{print $2}')
+          echo "actual chromedriver version: $ACTUAL_VERSION"
+          EXPECTED_MAJOR="114"
+          ACTUAL_MAJOR=$(echo "$ACTUAL_VERSION" | cut -d '.' -f 1)
+          if [ "$ACTUAL_MAJOR" != "$EXPECTED_MAJOR" ]; then
+            echo "FAIL: expected major version $EXPECTED_MAJOR but got $ACTUAL_MAJOR"
+            exit 1
+          fi
+          echo "PASS: chromedriver legacy version $ACTUAL_VERSION installed successfully"

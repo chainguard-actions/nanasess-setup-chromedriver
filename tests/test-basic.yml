@@ -1,0 +1,32 @@
+name: Test basic usage (auto-detect Chrome version)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Ensure google-chrome-stable is installed
+        run: |
+          if ! command -v google-chrome-stable > /dev/null 2>&1; then
+            echo "Installing google-chrome-stable..."
+            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 4EB27DB2A3B88B8B 2>/dev/null || true
+            echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google.list > /dev/null
+            sudo apt-get update -q
+            sudo apt-get install -y --no-install-recommends google-chrome-stable
+          fi
+          echo "Chrome version: $(google-chrome-stable --version)"
+
+      - id: action
+        uses: .
+        # No inputs — auto-detect Chrome version and install matching chromedriver
+
+      - name: Assert chromedriver is installed and executable
+        run: |
+          if ! command -v chromedriver > /dev/null 2>&1; then
+            echo "FAIL: chromedriver not found in PATH"
+            exit 1
+          fi
+          echo "PASS: chromedriver found at $(command -v chromedriver)"
+          echo "Chromedriver version: $(chromedriver --version)"
