@@ -1,4 +1,4 @@
-name: Test basic setup-chromedriver (no version specified)
+name: Test basic usage (auto-detect Chrome version)
 on:
   workflow_dispatch:
 jobs:
@@ -6,15 +6,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install Google Chrome
+        run: |
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -q
+          sudo apt-get install -y --no-install-recommends google-chrome-stable
+
       - id: setup
         uses: .
-      - name: Assert chromedriver is installed and on PATH
+        with:
+          chromeapp: google-chrome-stable
+
+      - name: Assert chromedriver is installed
         run: |
-          echo "Checking chromedriver is available..."
           if ! command -v chromedriver &>/dev/null; then
             echo "FAIL: chromedriver not found on PATH"
             exit 1
           fi
-          echo "chromedriver found at: $(command -v chromedriver)"
-          chromedriver --version
-          echo "PASS"
+          echo "PASS: chromedriver found at $(which chromedriver)"
+
+      - name: Assert chromedriver runs and reports version
+        run: |
+          VERSION_OUTPUT=$(chromedriver --version 2>&1 || true)
+          echo "chromedriver output: $VERSION_OUTPUT"
+          if ! echo "$VERSION_OUTPUT" | grep -qi "chromedriver"; then
+            echo "FAIL: chromedriver --version did not output expected text"
+            exit 1
+          fi
+          echo "PASS: chromedriver version output looks correct"

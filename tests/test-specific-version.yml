@@ -1,0 +1,31 @@
+name: Test specific chromedriver version (modern >=115)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: setup
+        uses: .
+        with:
+          chromedriver-version: "120.0.6099.109"
+
+      - name: Assert chromedriver is installed
+        run: |
+          if ! command -v chromedriver &>/dev/null; then
+            echo "FAIL: chromedriver not found on PATH"
+            exit 1
+          fi
+          echo "PASS: chromedriver found at $(which chromedriver)"
+
+      - name: Assert chromedriver version matches requested
+        run: |
+          VERSION_OUTPUT=$(chromedriver --version 2>&1 || true)
+          echo "chromedriver output: $VERSION_OUTPUT"
+          if ! echo "$VERSION_OUTPUT" | grep -q "120\."; then
+            echo "FAIL: expected chromedriver version 120.x but got: $VERSION_OUTPUT"
+            exit 1
+          fi
+          echo "PASS: chromedriver version 120.x confirmed"
