@@ -1,0 +1,107 @@
+name: "Test chromedriver on Windows"
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+    paths:
+      - '**'
+      - '!*.md'
+  pull_request:
+    branches:
+      - '*'
+    paths:
+      - '**'
+      - '!*.md'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, windows-2019 ]
+        branch:
+          # - 'master'
+          - 'now'
+    steps:
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+    - shell: pwsh
+      run: echo "CHROMEAPP=C:\Program Files\Google\Chrome\Application\chrome.exe" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+    - run: yarn install --frozen-lockfile
+    - run: yarn build
+    - run: yarn package
+    - run: yarn test
+    # - run: |
+    #     node_modules/.bin/tsc $GITHUB_WORKSPACE/__tests__/chromedriver.ts
+    #     # Cannot find chromedriver when using ncc.
+    #     # see https://github.com/nanasess/setup-chromedriver/issues/303
+    #     # node_modules/.bin/ncc build $GITHUB_WORKSPACE/__tests__/chromedriver.js -o $GITHUB_WORKSPACE/__tests__
+    #     # rm -rf node_modules
+    #   shell: bash
+    - shell: pwsh
+      run: |
+        $chrome_fullversion = (Get-Item $Env:CHROMEAPP).VersionInfo.FileVersion
+        $chrome_majorversion = $chrome_fullversion.Split(".")[0]
+        if($chrome_majorversion -lt 115)
+        {
+            $response = Invoke-WebRequest "http://chromedriver.storage.googleapis.com/LATEST_RELEASE_$chrome_majorversion"
+            $version = $response.Content -replace '[\r\n]', ''
+            "CHROMEDRIVER_VERSION=$version" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        }
+        else
+        {
+            $safe_fullversion = $chrome_fullversion -replace '[\r\n]', ''
+            "CHROMEDRIVER_VERSION=$safe_fullversion" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+        }
+    - uses: ./
+      if: matrix.branch == 'now'
+      with:
+        chromedriver-version: ${{ env.CHROMEDRIVER_VERSION }}
+        chromeapp: ${{ env.CHROMEAPP }}
+    - uses: nanasess/setup-chromedriver@904b949d6a9e6f5bb87b61ba516e716ddcc1ff8c # master
+      if: matrix.branch == 'master'
+      with:
+        chromedriver-version: ${{ env.CHROMEDRIVER_VERSION }}
+        chromeapp: ${{ env.CHROMEAPP }}
+    - name: setup
+      run: |
+        chromedriver --url-base=/wd/hub &
+        node_modules\.bin\ts-node "$Env:GITHUB_WORKSPACE\__tests__\chromedriver.ts"
+
+  test_default_version:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, windows-2019 ]
+        branch:
+          # - 'master'
+          - 'now'
+    steps:
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+    - shell: pwsh
+      run: echo "CHROMEAPP=C:\Program Files\Google\Chrome\Application\chrome.exe" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+    - run: yarn install --frozen-lockfile
+    - run: yarn build
+    - run: yarn package
+    - run: yarn test
+    # - run: |
+    #     node_modules/.bin/tsc $GITHUB_WORKSPACE/__tests__/chromedriver.ts
+    #     # Cannot find chromedriver when using ncc.
+    #     # see https://github.com/nanasess/setup-chromedriver/issues/303
+    #     # node_modules/.bin/ncc build $GITHUB_WORKSPACE/__tests__/chromedriver.js -o $GITHUB_WORKSPACE/__tests__
+    #     # rm -rf node_modules
+    #   shell: bash
+    - uses: ./
+      if: matrix.branch == 'now'
+    - uses: nanasess/setup-chromedriver@904b949d6a9e6f5bb87b61ba516e716ddcc1ff8c # master
+      if: matrix.branch == 'master'
+    - name: setup
+      run: |
+        chromedriver --url-base=/wd/hub &
+        node_modules\.bin\ts-node "$Env:GITHUB_WORKSPACE\__tests__\chromedriver.ts"
