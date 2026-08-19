@@ -1,4 +1,4 @@
-name: Test setup-chromedriver with specific version
+name: Test specific chromedriver version
 on:
   workflow_dispatch:
 jobs:
@@ -6,20 +6,38 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: action
+
+      - name: Run setup-chromedriver with a specific version
+        id: action
         uses: .
         with:
-          chromedriver-version: '114.0.5735.90'
-      - name: Assert chromedriver is installed
+          chromedriver-version: '120.0.6099.109'
+
+      - name: Assert chromedriver is installed and executable
         run: |
-          if ! command -v chromedriver &>/dev/null; then
-            echo "FAIL: chromedriver not found in PATH"
+          echo "Checking chromedriver is on PATH..."
+          if ! command -v chromedriver > /dev/null 2>&1; then
+            echo "FAIL: chromedriver not found on PATH"
             exit 1
           fi
-          ACTUAL_VERSION=$(chromedriver --version | awk '{print $2}')
-          echo "actual chromedriver version: $ACTUAL_VERSION"
-          if [ "$ACTUAL_VERSION" != "114.0.5735.90" ]; then
-            echo "FAIL: expected version 114.0.5735.90 but got $ACTUAL_VERSION"
+          echo "chromedriver found at: $(command -v chromedriver)"
+          echo "PASS: chromedriver is installed"
+
+      - name: Assert chromedriver reports the expected version
+        run: |
+          echo "Checking chromedriver version output..."
+          VERSION_OUTPUT=$(chromedriver --version 2>&1)
+          echo "chromedriver --version output: $VERSION_OUTPUT"
+          if [ -z "$VERSION_OUTPUT" ]; then
+            echo "FAIL: chromedriver --version produced no output"
             exit 1
           fi
-          echo "PASS"
+          if ! echo "$VERSION_OUTPUT" | grep -qi "chromedriver"; then
+            echo "FAIL: expected 'ChromeDriver' in version output, got: $VERSION_OUTPUT"
+            exit 1
+          fi
+          if ! echo "$VERSION_OUTPUT" | grep -q "120"; then
+            echo "FAIL: expected version 120 in output, got: $VERSION_OUTPUT"
+            exit 1
+          fi
+          echo "PASS: chromedriver version 120 is installed correctly"

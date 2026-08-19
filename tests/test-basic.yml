@@ -1,4 +1,4 @@
-name: Test setup-chromedriver basic usage
+name: Test basic usage (auto-detect version)
 on:
   workflow_dispatch:
 jobs:
@@ -6,13 +6,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: action
+
+      - name: Run setup-chromedriver without specifying version
+        id: action
         uses: .
-      - name: Assert chromedriver is installed
+
+      - name: Assert chromedriver is installed and executable
         run: |
-          if ! command -v chromedriver &>/dev/null; then
-            echo "FAIL: chromedriver not found in PATH"
+          echo "Checking chromedriver is on PATH..."
+          if ! command -v chromedriver > /dev/null 2>&1; then
+            echo "FAIL: chromedriver not found on PATH"
             exit 1
           fi
-          echo "chromedriver version: $(chromedriver --version)"
-          echo "PASS"
+          echo "chromedriver found at: $(command -v chromedriver)"
+          echo "PASS: chromedriver is installed"
+
+      - name: Assert chromedriver reports a version
+        run: |
+          echo "Checking chromedriver version output..."
+          VERSION_OUTPUT=$(chromedriver --version 2>&1)
+          echo "chromedriver --version output: $VERSION_OUTPUT"
+          if [ -z "$VERSION_OUTPUT" ]; then
+            echo "FAIL: chromedriver --version produced no output"
+            exit 1
+          fi
+          if ! echo "$VERSION_OUTPUT" | grep -qi "chromedriver"; then
+            echo "FAIL: expected 'ChromeDriver' in version output, got: $VERSION_OUTPUT"
+            exit 1
+          fi
+          echo "PASS: chromedriver version output looks correct"
